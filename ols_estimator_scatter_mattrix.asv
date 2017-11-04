@@ -1,0 +1,30 @@
+% clear up everything
+clear all; close all; clc;
+% create a multivariate normal matrix with 2 variables
+n=100; % number of entries
+mu = [2,3];
+sigma = [1,.5;
+         .5,2.5];
+% make X and Y
+X = [ones(n,1),mvnrnd(mu,sigma,n);]
+W=[4,3,-1]';
+Y=X*W+randn(n,1)*0.1;
+scatter(X(:,2),X(:,3),'.')
+% Scatter Matrix (n*Cov))
+Mu=ones(1,n)*X/n;
+X_p=X-ones(n,1)*Mu
+S1=X_p'*X_p
+M=Mu'*Mu;
+S2=X'*X-n*M
+% OLS estimator
+W_hat=inv(X'*X)*X'*Y
+
+% Optimizer
+W_0=zeros(1,3)
+
+function [SSR]=Loss_OLS(W_hat,X,Y)
+    Y_hat=X*W_hat';
+    R=Y_hat-Y;
+    SSR=R'*R;
+end
+
