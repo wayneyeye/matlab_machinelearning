@@ -2,16 +2,16 @@
 clear all; close all; clc;
 % create a multivariate normal matrix with 2 variables
 % postive
-n=50; % number of entries
-mu = [1,2];
-sigma = [2,-1;
-         -1,3];
+n=30; % number of entries
+mu = [2,2];
+sigma = [4,-1;
+         -1,6];
 X1 = [mvnrnd(mu,sigma,n)];
 Y1=ones(n,1);
 
 % negatives
 mu = [8,6];
-sigma = [1,-1.5;
+sigma = [7,-1.5;
          -1.5,5];
 X2 = [mvnrnd(mu,sigma,n)];
 Y2=-ones(n,1);
@@ -26,13 +26,15 @@ Y=[Y1;Y2];
 sz=size(X);
 n=sz(1);
 alpha_0=zeros(1,n);
+%complexity parameter
+c=0.1;
 %constraints
 A=[];
 b=[];
 Aeq=Y';
 beq=0;
 lb = zeros(1,n);
-ub = [];
+ub = c*ones(1,n);
 nonlcon=[];
 fun = @(alpha) svm_linear_obj_dual(X,Y,alpha);
 opts = optimoptions(@fmincon,'Algorithm','sqp','MaxFunctionEvaluations',5000,'MaxIterations',5000);
@@ -41,9 +43,9 @@ alpha = fmincon(fun,alpha_0,A,b,Aeq,beq,lb,ub,nonlcon,opts);
 %Get W and t
 alpha_y=alpha.*Y';
 W=alpha_y*X;
-tol=0.01;
+tol=0.0001;
 for i=1:n
-    if alpha(i)>tol
+    if alpha(i)>=tol&&alpha(i)<=(c-tol) % modified here
         t=W*X(i,:)'-1/Y(i);
         break;
     end
